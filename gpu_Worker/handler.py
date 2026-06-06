@@ -1,6 +1,7 @@
 import os
 import boto3
 import yt_dlp
+import runpod
 
 # S3 Client initialisieren
 s3_client = boto3.client('s3', region_name='eu-central-1')
@@ -8,12 +9,9 @@ s3_client = boto3.client('s3', region_name='eu-central-1')
 def handler(job):
     job_input = job.get("input", {})
     youtube_url = job_input.get("url")
-    
-    # HIER DIE KORREKTUR: Wir holen den KEY, nicht den Wert!
-    bucket_name = os.environ.get('S3_BUCKET_NAME') 
+    bucket_name = os.environ.get('S3_BUCKET_NAME')
     
     file_name = f"{job.get('id')}.wav"
-    local_path = f"/tmp/{file_name}"
     
     ydl_opts = {
         'format': 'bestaudio/best',
@@ -28,7 +26,6 @@ def handler(job):
     
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(youtube_url, download=True)
-        # yt-dlp benennt die Datei oft leicht anders, wir suchen den Pfad dynamisch
         downloaded_file = f"/tmp/{info['id']}.wav"
         
     # Upload zu S3
@@ -41,3 +38,8 @@ def handler(job):
         "status": "success",
         "s3_url": f"https://{bucket_name}.s3.amazonaws.com/{file_name}"
     }
+
+# DIESE ZEILE IST ENTSCHEIDEND:
+# Sie startet den Worker und verbindet ihn dauerhaft mit der RunPod API.
+if __name__ == "__main__":
+    runpod.serverless.start({"handler": handler})
