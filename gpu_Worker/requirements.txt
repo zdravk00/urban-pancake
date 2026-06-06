@@ -1,1 +1,4 @@
 runpod
+yt-dlp
+boto3
+requests

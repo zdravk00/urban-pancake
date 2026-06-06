@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hello World</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body class="bg-white flex flex-col items-center justify-center h-screen gap-4">
+
+  <h1 class="text-4xl font-bold text-gray-900">Hello World</h1>
+
+  <input
+    id="msgInput"
+    type="text"
+    placeholder="Nachricht eingeben..."
+    class="border border-gray-300 rounded-lg px-4 py-2 w-72 text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400"
+  />
+
+  <button
+    id="sendBtn"
+    class="bg-gray-900 text-white px-6 py-2 rounded-lg hover:bg-gray-700 active:scale-95 transition-all"
+  >
+    Send
+  </button>
+
+  <p id="status" class="text-sm text-gray-400 h-5"></p>
+
+  <script>
+    const socket = io();
+    const input = document.getElementById('msgInput');
+    const btn = document.getElementById('sendBtn');
+    const status = document.getElementById('status');
+
+    btn.addEventListener('click', () => {
+      const message = input.value.trim();
+      if (!message) {
+        status.textContent = 'Bitte eine Nachricht eingeben.';
+        return;
+      }
+
+      status.textContent = 'Sende...';
+      socket.emit('message', { message, sentAt: Date.now() });
+      input.value = '';
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') btn.click();
+    });
+
+    socket.on('message:ack', ({ duration }) => {
+      status.textContent = `✓ Angekommen in ${duration} ms`;
+    });
+
+    socket.on('connect', () => {
+      status.textContent = '🟢 Verbunden';
+      setTimeout(() => { status.textContent = ''; }, 1500);
+    });
+
+    socket.on('disconnect', () => {
+      status.textContent = '🔴 Verbindung getrennt';
+    });
+  </script>
+
+</body>
+</html>
