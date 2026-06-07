@@ -16,4 +16,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY gpu_Worker/ .
 
 # CMD wird meistens von RunPod überschrieben, aber wir lassen es als Backup
-CMD ["python3", "handler.py"]
+CMD ["python3", "-u", "handler.py"]

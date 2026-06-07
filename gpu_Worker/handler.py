@@ -1,12 +1,10 @@
-import os
-import boto3
-import yt_dlp
+import sys
 import runpod
 
 def handler(job):
     user_input = (job.get("input") or {}).get("userInput")
-    print(f"-----> THIS IS THE USER INPUT: {user_input}", flush=True)
-    return {"status": "done"}
+    sys.stderr.write(f"THIS IS THE USER INPUT: {user_input}\n")
+    sys.stderr.flush()
+    return {"status": "done", "echo": user_input}
 
-if __name__ == "__main__":
-    runpod.serverless.start({"handler": handler})
+runpod.serverless.start({"handler": handler})
