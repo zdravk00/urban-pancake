@@ -1,2 +1,3 @@
-runpod>=1.0.0
+runpod
+yt-dlp
 boto3
